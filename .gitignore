@@ -1,0 +1,31 @@
+# local secrets
+.env
+*.cnf.local
+logart-mysql.cnf
+
+# never commit lg-api (MPIWG code) or anything extracted from it
+*.jar
+*.jar.*
+PageTextMapper*.xml
+work/
+
+# data / indexes / test output
+*.tsv
+*.sql.gz
+manticore-data/
+*.spa
+*.spd
+*.spe
+*.sph
+*.spi
+*.spm
+*.spp
+*.sps
+*.spt
+*.spidx
+check_*.tsv
+
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

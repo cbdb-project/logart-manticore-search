@@ -1,0 +1,17 @@
+# /etc/cron.d/logart-mt-flush  (mode 644, owner root)
+#
+# Keep MySQL's cached FEDERATED connections to Manticore fresh.
+#
+# Why: MySQL FEDERATED caches one connection per open table handler and reuses it across sessions.
+# Manticore closes SQL connections idle longer than its session wait_timeout (28800 s = 8 h; it can
+# only be raised from a "VIP" listener and does not survive a restart). On the next use
+# libmysqlclient auto-reconnects and first sends "SET NAMES utf8mb4", which Manticore rejects for
+# the FEDERATED user -> every keyword search fails (HTTP 500, "Lost connection to MySQL server
+# during query" / ERROR 1430) until the handlers are dropped. A night without searches is enough.
+#
+# Flushing every 30 min keeps every cached connection younger than the idle limit. It is cheap
+# (closes idle handlers; the next search reconnects in ~1 ms) and changes no data. A FLUSH waits
+# for a running query on mt_pages to finish, so at worst one search is delayed by a few seconds.
+#
+# Credentials: the [client] option file used by the indexer (owner manticore, mode 600).
+*/30 * * * * manticore /usr/bin/mysql --defaults-extra-file=/etc/manticoresearch/logart-mysql.cnf -e "FLUSH TABLES gazetteer.mt_pages" >/dev/null 2>&1
